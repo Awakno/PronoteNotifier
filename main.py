@@ -1,8 +1,9 @@
-import asyncio
 from utils.debug_mode import debug_mode
+from webhook.custom import send_custom_webhook
 from webhook.discord import send_discord_webhook
 from api.session import initialize_session
 from api.cache.grades import GRADES_CACHE, initialize_grades_cache
+import asyncio
 
 async def check_for_new_grades(session):
     """
@@ -29,7 +30,10 @@ async def handler_webhook(grade):
     """
     Envoie des notifications pour une nouvelle note à plusieurs webhooks.
     """
-    await send_discord_webhook(grade)
+    asyncio.gather(
+        send_custom_webhook(grade),
+        send_discord_webhook(grade)
+    )
 
 if __name__ == "__main__":
     session = initialize_session()

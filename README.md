@@ -54,5 +54,6 @@ python pronotenotifier.py
 
 #### Add planning change notification: ❌
 #### Add canceled / absent teacher notification: ❌
+#### Add anothers method for notification: ❌
 
 Enjoy ⭐

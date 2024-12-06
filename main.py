@@ -2,8 +2,10 @@ from utils.debug_mode import debug_mode
 from webhook.custom import send_custom_webhook
 from webhook.discord import send_discord_webhook
 from api.session import initialize_session
-from api.cache.grades import GRADES_CACHE, initialize_grades_cache
+from api.cache.grades import GRADES_CACHE
 import asyncio
+from api.cache.handler import setup_cache_handler
+from api.session import SESSION as session
 
 async def check_for_new_grades(session):
     """
@@ -36,7 +38,11 @@ async def handler_webhook(grade):
     )
 
 if __name__ == "__main__":
-    session = initialize_session()
-    initialize_grades_cache(session)
+    asyncio.run(setup_cache_handler())
     print("Initialisation terminée. Le programme surveille maintenant les nouvelles notes...")
-    asyncio.run(check_for_new_grades(session))
+    try:
+        asyncio.run(check_for_new_grades(session))
+    except KeyboardInterrupt:
+        print("Arrêt du programme.")
+        input("Appuyez sur une touche pour quitter...")
+        exit(0)

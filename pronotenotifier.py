@@ -4,6 +4,7 @@ import asyncio
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from dotenv import load_dotenv
 import os
+import requests
 
 load_dotenv()
 
@@ -11,7 +12,7 @@ load_dotenv()
 GRADES_CACHE = set()  # Utilisation d'un set pour suivre les notes déjà vues
 WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL")
 
-def initialize_session():
+def initialize_session():  
     try:
         session = pronotepy.Client(
             pronote_url=os.getenv("PRONOTE_URL"),
@@ -46,8 +47,7 @@ async def check_for_new_grades(session):
             for period in session.periods:
                 for grade in period.grades:
                     # Génération de la clé unique pour cette note
-                    grade_key = (period.name, grade.subject.name, grade.date.isoformat(), grade.grade)
-                    
+                    grade_key = (period.name, grade.subject.name, grade.date.isoformat(), grade.grade)                    
                     if grade_key not in GRADES_CACHE:
                         # Nouvelle note détectée
                         GRADES_CACHE.add(grade_key)
@@ -62,6 +62,7 @@ async def send_webhook(grade):
     """
     Envoie une notification Discord pour une nouvelle note.
     """
+
     try:
         webhook = DiscordWebhook(url=WEBHOOK, content="@everyone")
         embed = DiscordEmbed(
@@ -74,6 +75,12 @@ async def send_webhook(grade):
         webhook.execute()
     except Exception as e:
         print(f"Erreur lors de l'envoi du webhook : {e}")
+    try:
+        rq = requests.post(os.getenv("CUSTOM_WEBHOOK_URL"), json={"metadata": {"pass": os.getenv("CUSTOM_WEBHOOK_PASS")}, "data": grade})
+        if rq.status_code != 200:
+            print(f"Erreur lors de l'envoi du webhook personnalisé : {rq.text}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du webhook personnalisé : {e}")
 
 if __name__ == "__main__":
     session = initialize_session()

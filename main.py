@@ -39,5 +39,4 @@ if __name__ == "__main__":
     session = initialize_session()
     initialize_grades_cache(session)
     print("Initialisation terminée. Le programme surveille maintenant les nouvelles notes...")
-
     asyncio.run(check_for_new_grades(session))

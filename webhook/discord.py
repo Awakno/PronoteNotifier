@@ -12,7 +12,7 @@ async def send_discord_webhook(grade):
         return
     try:
         # Envoi de la notification Discord
-        discord_webhook = DiscordWebhook(url=WEBHOOK, content="@everyone")
+        discord_webhook = DiscordWebhook(url=WEBHOOK)
         embed = DiscordEmbed(
             title=f"Nouvelle note : `{grade.subject.name}`",
             description=f"Sujet: **{grade.comment}** \nNote : **{grade.grade}**/{grade.out_of}",

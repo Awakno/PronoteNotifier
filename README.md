@@ -16,8 +16,8 @@ Pronote Notifier is a Python script that periodically checks for new grades on P
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/pronote-notifier.git
-    cd pronote-notifier
+    git clone https://github.com/Awakno/PronoteNotifier.git
+    cd PronoteNotifier
     ```
 
 2. Install the required packages:

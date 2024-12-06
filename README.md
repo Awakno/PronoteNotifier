@@ -47,7 +47,7 @@ Pronote Notifier is a Python script that periodically checks for new grades on P
 
 Run the script:
 ```sh
-python pronotenotifier.py
+python main.py
 ```
 
 ## Todo

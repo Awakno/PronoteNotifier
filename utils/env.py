@@ -2,6 +2,7 @@
 This file is used to read the environment variables from the .env file.
 """
 
+
 def get_env_variable():
     f = open(".env", "r")
     data = {}

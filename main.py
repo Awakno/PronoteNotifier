@@ -36,11 +36,12 @@ async def check_for_new_grades(session):
                             print(
                                 f"Nouvelle note détectée : {grade.subject.name} - {grade.grade}"
                             )
-                        await handler_webhook("grade",grade)
+                        await handler_webhook("grade", grade)
         except Exception as e:
             initialize_session()  # Reconnexion à Pronote en cas d'erreur
             print(f"Erreur pendant la vérification des notes : {e}")
         await asyncio.sleep(60)
+
 
 async def check_for_new_news(session):
     """
@@ -51,7 +52,7 @@ async def check_for_new_news(session):
             check_and_refresh_session()  # Vérification et rafraîchissement de la session
             for new in session.information_and_surveys(only_unread=True):
                 if isinstance(new, pronotepy.Information):
-                    
+
                     news_key = (
                         new.title,
                         new.author,
@@ -61,29 +62,33 @@ async def check_for_new_news(session):
                         NEWS_CACHE.add(news_key)
                         if debug_mode():
                             print(f"Nouvelle actualité détectée : {new.title}")
-                        await handler_webhook("news",new)
+                        await handler_webhook("news", new)
             for discussion in session.discussions(only_unread=True):
                 if isinstance(discussion, pronotepy.Discussion):
                     discussion_key = (
                         discussion.subject,
                         discussion.creator,
-                        discussion.messages[-1]
+                        discussion.messages[-1],
                     )
                     if discussion_key not in NEWS_CACHE:
                         DISCUSSIONS_CACHE.add(discussion_key)
                         if debug_mode():
-                            print(f"Nouvelle discussion détectée : {discussion.subject}")
-                        await handler_webhook("discussion",discussion)
+                            print(
+                                f"Nouvelle discussion détectée : {discussion.subject}"
+                            )
+                        await handler_webhook("discussion", discussion)
         except Exception as e:
             initialize_session()
             print(f"Erreur pendant la vérification des actualités : {e}")
         await asyncio.sleep(60)
+
 
 async def handler_check(session):
     """
     Vérifie périodiquement les nouvelles notes et actualités.
     """
     await asyncio.gather(check_for_new_grades(session), check_for_new_news(session))
+
 
 async def handler_webhook(type_of: str, data):
     """

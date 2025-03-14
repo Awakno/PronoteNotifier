@@ -6,6 +6,7 @@ from utils.debug_mode import debug_mode
 env = get_env_variable()
 WEBHOOK = env["DISCORD_WEBHOOK_URL"]
 
+
 async def send_discord_news_webhook(news: pronotepy.Information):
     """
     Envoie une notification Discord pour une nouvelle actualité

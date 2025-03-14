@@ -6,6 +6,7 @@ from utils.debug_mode import debug_mode
 env = get_env_variable()
 WEBHOOK = env["DISCORD_WEBHOOK_URL"]
 
+
 async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
     """
     Envoie une notification Discord pour une nouvelle actualité
@@ -18,7 +19,11 @@ async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
     try:
         # Envoi de la notification Discord
         discord_webhook = DiscordWebhook(url=WEBHOOK)
-        subject = discussion.messages[-1].content[:1000] if discussion.messages else "Aucun commentaire"
+        subject = (
+            discussion.messages[-1].content[:1000]
+            if discussion.messages
+            else "Aucun commentaire"
+        )
         embed = DiscordEmbed(
             title="Nouvelle discussion créée",
             description=f"**{discussion.subject}**\n\n{subject}",
@@ -26,7 +31,9 @@ async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
         )
         embed.add_embed_field(name="Auteur", value=discussion.creator, inline=False)
         embed.add_embed_field(
-            name="Date", value=discussion.date.strftime("%d/%m/%Y %Hh%M:%S"), inline=True
+            name="Date",
+            value=discussion.date.strftime("%d/%m/%Y %Hh%M:%S"),
+            inline=True,
         )
         embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()

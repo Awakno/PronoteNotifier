@@ -2,6 +2,7 @@ from api.cache import grades, news
 from api.session import SESSION as session
 from message.Status import Info, Warning
 
+
 async def setup_cache_handler():
     """
     Configure le gestionnaire de cache.

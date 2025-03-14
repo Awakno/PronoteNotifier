@@ -1,4 +1,5 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
+import pronotepy
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -6,7 +7,11 @@ env = get_env_variable()
 WEBHOOK = env["DISCORD_WEBHOOK_URL"]
 
 
-async def send_discord_webhook(grade):
+async def send_discord_grades_webhook(grade: pronotepy.Grade):
+    """
+    Envoie une notification Discord pour une nouvelle actualité
+    :param grade: pronotepy.Grade: Note à notifier
+    """
     if not WEBHOOK:
         if debug_mode():
             print("[DEBUG]: Aucun webhook Discord n'a été défini.")

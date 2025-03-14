@@ -15,3 +15,6 @@ def initialize_grades_cache(session):
                 grade.grade,
             )
             GRADES_CACHE.add(grade_key)
+    if len(GRADES_CACHE) == 0:
+        return False
+    return True

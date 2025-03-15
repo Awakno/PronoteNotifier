@@ -7,17 +7,15 @@ async def setup_cache_handler():
     """
     Configure le gestionnaire de cache.
     """
+    def handle_status(status, success_msg, failure_msg):
+        if status:
+            print(Info(success_msg))
+        else:
+            print(Warning(failure_msg))
+
     news_status, discussion_status = news.initialize_news_cache(session)
-    if not news_status:
-        print(Warning("Aucune actualité détectée."))
-    else:
-        print(Info("Initialisation des actualités terminée."))
-    if not discussion_status:
-        print(Warning("Aucune discussion détectée."))
-    else:
-        print(Info("Initialisation des discussions terminée."))
+    handle_status(news_status, "Initialisation des actualités terminée.", "Aucune actualité détectée.")
+    handle_status(discussion_status, "Initialisation des discussions terminée.", "Aucune discussion détectée.")
+
     grade_status = grades.initialize_grades_cache(session)
-    if not grade_status:
-        print(Warning("Aucune note détectée."))
-    else:
-        print(Info("Initialisation des notes terminée."))
+    handle_status(grade_status, "Initialisation des notes terminée.", "Aucune note détectée.")

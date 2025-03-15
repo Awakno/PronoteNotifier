@@ -8,27 +8,25 @@ env = get_env_variable()
 
 async def send_custom_webhook(data):
     """
-    Envoie une notification personnalisée via un webhook
+    Envoie une notification personnalisée via un webhook.
     :param data: dict: Données à envoyer
     """
-    if not env.get("CUSTOM_WEBHOOK_URL") or not env.get("CUSTOM_WEBHOOK_PASS"):
+    custom_webhook_url = env.get("CUSTOM_WEBHOOK_URL")
+    custom_webhook_pass = env.get("CUSTOM_WEBHOOK_PASS")
+
+    if not custom_webhook_url or not custom_webhook_pass:
         if debug_mode():
             print("[DEBUG]: Aucun webhook personnalisé n'a été défini.")
         return
+
     try:
-        # Envoi de la notification personnalisée
-        custom_webhook_url = env.get("CUSTOM_WEBHOOK_URL")
-        custom_webhook_pass = env.get("CUSTOM_WEBHOOK_PASS")
-        if custom_webhook_url and custom_webhook_pass:
-            rq = requests.post(
-                custom_webhook_url,
-                json={"metadata": {"pass": custom_webhook_pass}, "data": data},
-            )
-            if rq.status_code != 200:
-                print(
-                    Error(
-                        f"Erreur lors de l'envoi du webhook personnalisé : {rq.status_code}"
-                    )
-                )
+        response = requests.post(
+            custom_webhook_url,
+            json={"metadata": {"pass": custom_webhook_pass}, "data": data},
+        )
+        if response.status_code != 200:
+            print(Error(f"Erreur lors de l'envoi du webhook personnalisé : {response.status_code}"))
+    except requests.RequestException as e:
+        print(Error(f"Erreur réseau lors de l'envoi du webhook personnalisé : {e}"))
     except Exception as e:
-        print(Error(f"Erreur lors de l'envoi du webhook personnalisé : {e}"))
+        print(Error(f"Erreur inattendue lors de l'envoi du webhook personnalisé : {e}"))

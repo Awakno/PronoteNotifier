@@ -4,35 +4,40 @@ from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
 env = get_env_variable()
-WEBHOOK = env["DISCORD_WEBHOOK_URL"]
+WEBHOOK = env.get("DISCORD_WEBHOOK_URL")
 
 
 async def send_discord_grades_webhook(grade: pronotepy.Grade):
     """
-    Envoie une notification Discord pour une nouvelle actualité
-    :param grade: pronotepy.Grade: Note à notifier
+    Sends a Discord notification for a new grade.
+    :param grade: pronotepy.Grade: Grade to notify
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: Aucun webhook Discord n'a été défini.")
+            print("[DEBUG]: No Discord webhook URL defined.")
         return
+
     try:
-        # Envoi de la notification Discord
+        # Prepare Discord webhook and embed
         discord_webhook = DiscordWebhook(url=WEBHOOK)
-        subject = f"**{grade.comment}**" if grade.comment else "Aucun commentaire"
         embed = DiscordEmbed(
-            title="Nouvelle note reçue",
-            description=f"**Matière :** {grade.subject.name}\n**Note :** {grade.grade}/{grade.out_of}",
+            title="New Grade Received",
+            description=f"**Subject:** {grade.subject.name}\n**Grade:** {grade.grade}/{grade.out_of}",
             color=242424,
         )
-        embed.add_embed_field(name="Commentaire", value=subject, inline=False)
+        embed.add_embed_field(
+            name="Comment", value=grade.comment or "No comment", inline=False
+        )
         embed.add_embed_field(
             name="Date", value=grade.date.strftime("%d/%m/%Y"), inline=True
         )
         embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()
+
+        # Add embed and execute webhook
         discord_webhook.add_embed(embed)
         discord_webhook.execute()
+
     except Exception as e:
         if debug_mode():
-            print(f"Erreur lors de l'envoi du webhook Discord : {e}")
+            print(f"[DEBUG]: Error sending Discord webhook: {e}")

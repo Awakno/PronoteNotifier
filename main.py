@@ -10,6 +10,7 @@ from api.session import (
     check_and_refresh_session,
     SESSION as session,
 )
+from message.Status import Debug
 from utils.debug_mode import debug_mode
 from webhook.attendance.discord import send_discord_edt_webhook
 from webhook.custom import send_custom_webhook
@@ -127,7 +128,7 @@ async def send_notifications(handler_type, data):
 def log_debug(message, *details):
     """Affiche un message de debug si activé."""
     if debug_mode():
-        print(message, "-", *details)
+        print(Debug(f"{message} - {details}"))
 
 
 async def main():

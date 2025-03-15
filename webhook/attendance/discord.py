@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -12,7 +13,7 @@ async def send_discord_edt_webhook(edt: pronotepy.Lesson):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: No Discord webhook URL defined.")
+            print(Debug("Aucune URL de webhook Discord définie. ❌"))
         return
 
     wb = DiscordWebhook(url=WEBHOOK)

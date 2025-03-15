@@ -1,5 +1,5 @@
 import requests
-from message.Status import Error
+from message.Status import Debug, Error
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -16,7 +16,7 @@ async def send_custom_webhook(data):
 
     if not custom_webhook_url or not custom_webhook_pass:
         if debug_mode():
-            print("[DEBUG]: Aucun webhook personnalisé n'a été défini.")
+            print(Debug("Aucune URL de webhook personnalisée définie."))
         return
 
     try:

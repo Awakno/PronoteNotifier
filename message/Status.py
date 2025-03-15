@@ -13,3 +13,6 @@ def Warning(message: str) -> None:
 
 def Info(message: str) -> None:
     return f"{Fore.CYAN}[INFO] {Fore.WHITE}{message}{Style.RESET_ALL}"
+
+def Debug(message: str) -> None:
+    return f"{Fore.MAGENTA}[DEBUG] {Fore.WHITE}{message}{Style.RESET_ALL}"

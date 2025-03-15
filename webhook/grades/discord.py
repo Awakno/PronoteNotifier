@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -14,7 +15,7 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: Aucune URL de webhook Discord définie.")
+            print(Debug("Aucune URL de webhook Discord définie."))
         return
 
     try:
@@ -40,4 +41,4 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
 
     except Exception as e:
         if debug_mode():
-            print(f"[DEBUG]: Erreur lors de l'envoi du webhook Discord : {e}")
+            print(Debug(f"Erreur lors de l'envoi du webhook Discord : {e}"))

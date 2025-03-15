@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -14,7 +15,7 @@ async def send_discord_news_webhook(news: pronotepy.Information):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: No Discord webhook URL defined.")
+            print(Debug("Aucune URL de webhook Discord définie."))
         return
 
     try:
@@ -30,11 +31,11 @@ async def send_discord_news_webhook(news: pronotepy.Information):
         embed.add_embed_field(
             name="📅 Date", value=news.start_date.strftime("%d/%m/%Y"), inline=True
         )
-        embed.set_footer(text="Pronote Notifier 🇫🇷")
+        embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()
 
         discord_webhook.add_embed(embed)
         discord_webhook.execute()
     except Exception as e:
         if debug_mode():
-            print(f"[DEBUG]: Erreur lors de l'envoi du webhook Discord : {e}")
+            print(Debug(f"Erreur lors de l'envoi du webhook Discord : {e}"))

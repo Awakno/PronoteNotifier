@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
 
@@ -14,12 +15,12 @@ async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: Aucune URL de webhook Discord définie. ❌")
+            print(Debug("Aucune URL de webhook Discord définie. ❌"))
         return
 
     if not discussion:
         if debug_mode():
-            print("[DEBUG]: Aucune discussion fournie. ❌")
+            print(Debug("Aucune discussion à notifier. ❌"))
         return
 
     try:
@@ -49,4 +50,4 @@ async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
         discord_webhook.execute()
     except Exception as e:
         if debug_mode():
-            print(f"[DEBUG]: Erreur lors de l'envoi du webhook Discord : {e} ❗")
+            print(Debug(f"Erreur lors de l'envoi du webhook Discord : {e}"))

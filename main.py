@@ -102,6 +102,7 @@ async def check_edt_background(session, cache, handler_type):
         {hour for hour in EDT_CACHE if hour[1] < datetime.now()}
     )
 
+
 async def check_homeworks(session, cache, handler_type):
     """Vérifie et notifie les nouveaux devoirs."""
     for period in session.homework(date_from=datetime.now().date()):

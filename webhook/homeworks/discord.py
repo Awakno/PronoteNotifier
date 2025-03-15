@@ -6,19 +6,20 @@ from utils.env import get_env_variable
 
 webhook = get_env_variable().get("DISCORD_WEBHOOK_URL")
 
+
 async def send_discord_homeworks_webhook(homeworks: pronotepy.Homework):
     """
     Vérifie et notifie les nouveaux devoirs.
     """
-    
+
     if not webhook:
         if debug_mode():
             print("[DEBUG]: Aucun webhook Discord défini.")
         return
-    
+
     wb = DiscordWebhook(url=webhook)
     embed = DiscordEmbed(
-        title="📚 Nouveau devoir",description=homeworks.description, color=0x3498DB
+        title="📚 Nouveau devoir", description=homeworks.description, color=0x3498DB
     )
     embed.add_embed_field(
         name="📖 Matière", value=homeworks.subject.name or "Non spécifié", inline=False
@@ -29,4 +30,3 @@ async def send_discord_homeworks_webhook(homeworks: pronotepy.Homework):
     embed.set_timestamp()
     wb.add_embed(embed)
     wb.execute()
-    

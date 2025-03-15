@@ -3,6 +3,7 @@ import pronotepy
 
 HOMEWORKS_CACHE = set()
 
+
 def get_homeworks(session: pronotepy.Client) -> list:
     """
     Récupère les devoirs à faire.
@@ -14,5 +15,5 @@ def get_homeworks(session: pronotepy.Client) -> list:
             period.description,
         )
         if homework_key not in HOMEWORKS_CACHE:
-            HOMEWORKS_CACHE.add(homework_key)      
+            HOMEWORKS_CACHE.add(homework_key)
     return bool(HOMEWORKS_CACHE)

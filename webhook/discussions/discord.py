@@ -14,39 +14,39 @@ async def send_discord_discussions_webhook(discussion: pronotepy.Discussion):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: No Discord webhook URL defined.")
+            print("[DEBUG]: Aucune URL de webhook Discord définie. ❌")
         return
 
     if not discussion:
         if debug_mode():
-            print("[DEBUG]: No discussion provided.")
+            print("[DEBUG]: Aucune discussion fournie. ❌")
         return
 
     try:
-        # Prepare the Discord webhook
+        # Préparer le webhook Discord
         discord_webhook = DiscordWebhook(url=WEBHOOK)
-        subject = (
+        sujet = (
             discussion.messages[-1].content[:1000]
             if discussion.messages
-            else "No comments"
+            else "Pas de commentaires 📝"
         )
         embed = DiscordEmbed(
-            title="New Discussion Created",
-            description=f"**{discussion.subject}**\n\n{subject}",
-            color=0x3A3A3A,  # Hexadecimal for better readability
+            title="🆕 Nouvelle Discussion Créée",
+            description=f"**{discussion.subject}**\n\n{sujet}",
+            color=0x3498DB,  # Hexadécimal pour une meilleure lisibilité
         )
-        embed.add_embed_field(name="Author", value=discussion.creator, inline=False)
+        embed.add_embed_field(name="👤 Auteur", value=discussion.creator, inline=False)
         embed.add_embed_field(
-            name="Date",
+            name="📅 Date",
             value=discussion.date.strftime("%d/%m/%Y %H:%M:%S"),
             inline=True,
         )
-        embed.set_footer(text="Pronote Notifier")
+        embed.set_footer(text="Pronote Notifier 🚀")
         embed.set_timestamp()
 
-        # Send the webhook
+        # Envoyer le webhook
         discord_webhook.add_embed(embed)
         discord_webhook.execute()
     except Exception as e:
         if debug_mode():
-            print(f"[DEBUG]: Error sending Discord webhook: {e}")
+            print(f"[DEBUG]: Erreur lors de l'envoi du webhook Discord : {e} ❗")

@@ -17,7 +17,7 @@ async def send_discord_edt_webhook(edt: pronotepy.Lesson):
 
     wb = DiscordWebhook(url=WEBHOOK)
     embed = DiscordEmbed(
-        title="📚 Nouvel événement dans l'emploi du temps", color=0x3A3A3A
+        title="📚 Nouvel événement dans l'emploi du temps", color=0x3498DB
     )
     embed.add_embed_field(
         name="📖 Matière", value=edt.subject.name or "Non spécifié", inline=False

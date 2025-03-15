@@ -9,8 +9,7 @@ Pronote Notifier is a Python script that periodically checks for new grades on P
 - Python 3.6+
 - `discord_webhook`
 - `pronotepy`
-- `python-dotenv`
-- `requests`
+- `colorama`
 
 ## Installation
 
@@ -52,8 +51,10 @@ python main.py
 
 ## Todo
 
-#### Add planning change notification: ❌
-#### Add canceled / absent teacher notification: ❌
-#### Add anothers method for notification: ❌
+#### Add planning change notification: 🟢
+#### Add canceled / absent teacher notification: 🟢
+#### Add HomeWorks notification : 🟢
+#### Discussion and information notification : 🟢
+#### Add grade notification : 🟢
 
 Enjoy ⭐

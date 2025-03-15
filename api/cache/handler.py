@@ -1,4 +1,4 @@
-from api.cache import attendance, grades, news
+from api.cache import attendance, grades, news, homeworks
 from api.session import SESSION as session
 from message.Status import Info, Warning
 
@@ -36,4 +36,11 @@ async def setup_cache_handler():
         attendance_status,
         "Initialisation de l'emploi du temps terminée.",
         "Aucun événement détecté.",
+    )
+
+    homework_status = homeworks.get_homeworks(session)
+    handle_status(
+        homework_status,
+        "Initialisation des devoirs terminée.",
+        "Aucun devoir détecté.",
     )

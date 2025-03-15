@@ -14,22 +14,22 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
     """
     if not WEBHOOK:
         if debug_mode():
-            print("[DEBUG]: No Discord webhook URL defined.")
+            print("[DEBUG]: Aucune URL de webhook Discord définie.")
         return
 
     try:
         # Prepare Discord webhook and embed
         discord_webhook = DiscordWebhook(url=WEBHOOK)
         embed = DiscordEmbed(
-            title="New Grade Received",
-            description=f"**Subject:** {grade.subject.name}\n**Grade:** {grade.grade}/{grade.out_of}",
-            color=242424,
+            title="📢 Nouvelle Note Reçue 🎉",
+            description=f"**📚 Matière :** {grade.subject.name}\n**✏️ Note :** {grade.grade}/{grade.out_of}",
+            color=0x3498DB,
         )
         embed.add_embed_field(
-            name="Comment", value=grade.comment or "No comment", inline=False
+            name="💬 Commentaire", value=grade.comment or "Aucun commentaire", inline=False
         )
         embed.add_embed_field(
-            name="Date", value=grade.date.strftime("%d/%m/%Y"), inline=True
+            name="📅 Date", value=grade.date.strftime("%d/%m/%Y"), inline=True
         )
         embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()
@@ -40,4 +40,4 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
 
     except Exception as e:
         if debug_mode():
-            print(f"[DEBUG]: Error sending Discord webhook: {e}")
+            print(f"[DEBUG]: Erreur lors de l'envoi du webhook Discord : {e}")

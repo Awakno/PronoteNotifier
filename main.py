@@ -1,7 +1,7 @@
 from datetime import datetime
-import pronotepy
 import asyncio
 from api.cache.attendance import EDT_CACHE, check_edt
+from api.cache.homeworks import HOMEWORKS_CACHE
 from api.cache.news import DISCUSSIONS_CACHE, NEWS_CACHE
 from api.cache.grades import GRADES_CACHE
 from api.cache.handler import setup_cache_handler
@@ -15,6 +15,7 @@ from webhook.attendance.discord import send_discord_edt_webhook
 from webhook.custom import send_custom_webhook
 from webhook.discussions.discord import send_discord_discussions_webhook
 from webhook.grades.discord import send_discord_grades_webhook
+from webhook.homeworks.discord import send_discord_homeworks_webhook
 from webhook.news.discord import send_discord_news_webhook
 
 WEBHOOK_CALLBACKS = {
@@ -22,6 +23,7 @@ WEBHOOK_CALLBACKS = {
     "grade": send_discord_grades_webhook,
     "discussion": send_discord_discussions_webhook,
     "edt": send_discord_edt_webhook,
+    "homework": send_discord_homeworks_webhook,
 }
 
 
@@ -100,6 +102,19 @@ async def check_edt_background(session, cache, handler_type):
         {hour for hour in EDT_CACHE if hour[1] < datetime.now()}
     )
 
+async def check_homeworks(session, cache, handler_type):
+    """Vérifie et notifie les nouveaux devoirs."""
+    for period in session.homework(date_from=datetime.now().date()):
+        homework_key = (
+            period.subject.name,
+            period.date,
+            period.description,
+        )
+        if homework_key not in cache:
+            cache.add(homework_key)
+            log_debug("Nouveau devoir", period.subject.name)
+            await send_notifications(handler_type, period)
+
 
 async def send_notifications(handler_type, data):
     """Envoie des notifications via les webhooks."""
@@ -126,6 +141,7 @@ async def main():
                 session, check_news_and_discussions, DISCUSSIONS_CACHE, "discussion"
             ),
             check_for_updates(session, check_edt_background, EDT_CACHE, "edt"),
+            check_for_updates(session, check_homeworks, HOMEWORKS_CACHE, "homework"),
         )
     except KeyboardInterrupt:
         print("Arrêt du programme.")

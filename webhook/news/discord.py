@@ -21,7 +21,6 @@ async def send_discord_news_webhook(news: pronotepy.Information):
         # Prepare the Discord webhook
         discord_webhook = DiscordWebhook(url=WEBHOOK)
         subject = news.content[:1000] if news.content else "No comments available"
-        
         embed = DiscordEmbed(
             title="New News Received",
             description=f"**{news.title}**\n\n{subject}",

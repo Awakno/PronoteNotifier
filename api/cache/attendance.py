@@ -9,10 +9,11 @@ def get_edt(session: pronotepy.Client) -> bool:
     Récupère l'emploi du temps de l'utilisateur.
     """
     for hour in session.lessons(
-        date_from=datetime.now(), date_to=datetime.today() + timedelta(days=28)
+        date_from=datetime.now().replace(hour=0,minute=0,second=0,microsecond=0), date_to=datetime.today() + timedelta(days=28)
     ):
 
         hour_key = (
+            hour.id,
             hour.start,
             hour.end,
             hour.subject.name,
@@ -33,10 +34,12 @@ def check_edt(session: pronotepy.Client) -> list:
     """
     new_hours = set()
     for hour in session.lessons(
-        date_from=datetime.today(), date_to=datetime.today() + timedelta(days=28)
+        date_from=datetime.now().replace(hour=0, minute=0, second=0, microsecond=0), 
+        date_to=datetime.today() + timedelta(days=28)
     ):
-
+        
         hour_key = (
+            hour.id,
             hour.start,
             hour.end,
             hour.subject.name,

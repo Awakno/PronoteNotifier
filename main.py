@@ -85,6 +85,7 @@ async def check_edt_background(session, cache, handler_type):
 
     for hour in actual_edt:
         hour_key = (
+            hour.id,
             hour.start,
             hour.end,
             hour.subject.name,
@@ -95,12 +96,42 @@ async def check_edt_background(session, cache, handler_type):
         )
 
         if hour_key not in cache:
+            if hour_key[1] < datetime.now():
+                continue
+            
             cache.add(hour_key)
-            log_debug("Nouvel événement", hour.subject.name)
-            await send_notifications(handler_type, hour)
+            if hour.status == "Exceptionnel":
+                log_debug("Nouvel événement exceptionnel", hour.subject.name)
+                await send_notifications(handler_type, hour)
+            else:
+                log_debug("Nouvel événement", hour.subject.name, hour.start, " - ", hour.end)
+            
+        else:
+            cached_hour = next((c for c in cache if c[0] == hour.id and c[1] == hour.start and hour.end == c[2]), None)
+            if cached_hour:
+                changes = []
+                if hour.start != cached_hour[1] or hour.end != cached_hour[2]:
+                    changes.append("Changement d'heure")
+                if hour.subject.name != cached_hour[3]:
+                    changes.append("Changement de matière")
+                if tuple(hour.teacher_names) != cached_hour[4]:
+                    changes.append("Changement de professeur")
+                if tuple(str(c) for c in hour.classrooms) != cached_hour[5]:
+                    changes.append("Changement de salle")
+                if hour.canceled != cached_hour[7]:
+                    changes.append("Cours annulé")
+                if hour.status != cached_hour[6]:
+                    changes.append(f"Statut changé à {hour.status}")
+
+                if changes:
+                    cache.remove(cached_hour)
+                    cache.add(hour_key)
+                    for change in changes:
+                        log_debug(change, hour.subject.name)
+                    await send_notifications(handler_type, hour)
 
     EDT_CACHE.difference_update(
-        {hour for hour in EDT_CACHE if hour[1] < datetime.now()}
+        {hour for hour in EDT_CACHE if hour[2] < datetime.now()}
     )
 
 

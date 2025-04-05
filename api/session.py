@@ -12,6 +12,8 @@ SESSION = None
 def initialize_session():
     global SESSION
     try:
+        if SESSION:
+            SESSION.communication.session.close()  # Cleanup existing session
         session = pronotepy.Client(
             pronote_url=env.get("PRONOTE_URL"),
             username=env.get("PRONOTE_USERNAME"),

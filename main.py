@@ -98,16 +98,25 @@ async def check_edt_background(session, cache, handler_type):
         if hour_key not in cache:
             if hour_key[1] < datetime.now():
                 continue
-            
+
             cache.add(hour_key)
             if hour.status == "Exceptionnel":
                 log_debug("Nouvel événement exceptionnel", hour.subject.name)
                 await send_notifications(handler_type, hour)
             else:
-                log_debug("Nouvel événement", hour.subject.name, hour.start, " - ", hour.end)
-            
+                log_debug(
+                    "Nouvel événement", hour.subject.name, hour.start, " - ", hour.end
+                )
+
         else:
-            cached_hour = next((c for c in cache if c[0] == hour.id and c[1] == hour.start and hour.end == c[2]), None)
+            cached_hour = next(
+                (
+                    c
+                    for c in cache
+                    if c[0] == hour.id and c[1] == hour.start and hour.end == c[2]
+                ),
+                None,
+            )
             if cached_hour:
                 changes = []
                 if hour.start != cached_hour[1] or hour.end != cached_hour[2]:
@@ -162,6 +171,14 @@ def log_debug(message, *details):
         print(Debug(f"{message} - {details}"))
 
 
+async def cleanup():
+    """Clean up resources before exiting."""
+    global session
+    if session:
+        session.communication.session.close()  # Close the Pronote session
+    print("Resources cleaned up. Exiting...")
+
+
 async def main():
     """Point d'entrée principal."""
     await setup_cache_handler()
@@ -178,8 +195,8 @@ async def main():
         )
     except KeyboardInterrupt:
         print("Arrêt du programme.")
-        input("Appuyez sur une touche pour quitter...")
-        exit(0)
+    finally:
+        await cleanup()  # Ensure cleanup is called
 
 
 if __name__ == "__main__":

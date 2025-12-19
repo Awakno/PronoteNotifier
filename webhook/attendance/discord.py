@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+import asyncio
 from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
@@ -55,5 +56,9 @@ async def send_discord_edt_webhook(edt: pronotepy.Lesson):
     )
     embed.set_footer(text="Pronote Notifier")
     embed.set_timestamp()
-    wb.add_embed(embed)
-    wb.execute()
+
+    def exec_webhook():
+        wb.add_embed(embed)
+        wb.execute()
+
+    await asyncio.to_thread(exec_webhook)

@@ -4,6 +4,4 @@ env = get_env_variable()
 
 
 def debug_mode():
-    if env["DEBUG"] == "True":
-        return True
-    return False
+    return str(env.get("DEBUG", "False")).lower() in ("1", "true", "yes")

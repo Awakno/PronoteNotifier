@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+import asyncio
 from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
@@ -21,21 +22,28 @@ async def send_discord_news_webhook(news: pronotepy.Information):
     try:
         # Prepare the Discord webhook
         discord_webhook = DiscordWebhook(url=WEBHOOK)
-        subject = news.content[:1000] if news.content else "Pas de commentaire disponible"
+        subject = (
+            news.content[:1000] if news.content else "Pas de commentaire disponible"
+        )
         embed = DiscordEmbed(
             title="📢 Nouvelle Actualité Reçue",
             description=f"**{news.title}**\n\n{subject}",
             color=0x3498DB,  # Blue color for a more vibrant look
         )
-        embed.add_embed_field(name="✍️ Auteur", value=news.author or "Inconnu", inline=False)
+        embed.add_embed_field(
+            name="✍️ Auteur", value=news.author or "Inconnu", inline=False
+        )
         embed.add_embed_field(
             name="📅 Date", value=news.start_date.strftime("%d/%m/%Y"), inline=True
         )
         embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()
 
-        discord_webhook.add_embed(embed)
-        discord_webhook.execute()
+        def exec_webhook():
+            discord_webhook.add_embed(embed)
+            discord_webhook.execute()
+
+        await asyncio.to_thread(exec_webhook)
     except Exception as e:
         if debug_mode():
             print(Debug(f"Erreur lors de l'envoi du webhook Discord : {e}"))

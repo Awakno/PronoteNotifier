@@ -1,5 +1,6 @@
 from discord_webhook import DiscordEmbed, DiscordWebhook
 import pronotepy
+import asyncio
 from message.Status import Debug
 from utils.env import get_env_variable
 from utils.debug_mode import debug_mode
@@ -27,7 +28,9 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
             color=0x3498DB,
         )
         embed.add_embed_field(
-            name="💬 Commentaire", value=grade.comment or "Aucun commentaire", inline=False
+            name="💬 Commentaire",
+            value=grade.comment or "Aucun commentaire",
+            inline=False,
         )
         embed.add_embed_field(
             name="📅 Date", value=grade.date.strftime("%d/%m/%Y"), inline=True
@@ -35,9 +38,12 @@ async def send_discord_grades_webhook(grade: pronotepy.Grade):
         embed.set_footer(text="Pronote Notifier")
         embed.set_timestamp()
 
-        # Add embed and execute webhook
-        discord_webhook.add_embed(embed)
-        discord_webhook.execute()
+        # Execute webhook in a thread to avoid blocking
+        def exec_webhook():
+            discord_webhook.add_embed(embed)
+            discord_webhook.execute()
+
+        await asyncio.to_thread(exec_webhook)
 
     except Exception as e:
         if debug_mode():

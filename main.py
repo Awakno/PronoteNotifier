@@ -5,13 +5,11 @@ from api.cache.homeworks import HOMEWORKS_CACHE
 from api.cache.news import DISCUSSIONS_CACHE, NEWS_CACHE
 from api.cache.grades import GRADES_CACHE
 from api.cache.handler import setup_cache_handler
-from api.session import (
-    initialize_session,
-    check_and_refresh_session,
-    SESSION as session,
-)
+from api import session as session_state
+from api.session import initialize_session, check_and_refresh_session
 from message.Status import Debug
 from utils.debug_mode import debug_mode
+from utils.env import get_env_variable
 from webhook.attendance.discord import send_discord_edt_webhook
 from webhook.custom import send_custom_webhook
 from webhook.discussions.discord import send_discord_discussions_webhook
@@ -27,15 +25,24 @@ WEBHOOK_CALLBACKS = {
     "homework": send_discord_homeworks_webhook,
 }
 
+env = get_env_variable()
 
-async def check_for_updates(session, check_function, cache, handler_type):
+
+async def _disabled_noop(data):
+    if debug_mode():
+        print(Debug("Provider disabled"))
+    return None
+
+
+async def check_for_updates(check_function, cache, handler_type, *args):
     """
     Vérifie périodiquement les mises à jour et envoie des notifications.
     """
     while True:
         try:
             check_and_refresh_session()
-            await check_function(session, cache, handler_type)
+            current_session = session_state.SESSION
+            await check_function(current_session, cache, handler_type, *args)
         except Exception as e:
             initialize_session()
             print(f"Erreur ({handler_type}) : {e}")
@@ -56,6 +63,17 @@ async def check_grades(session, cache, handler_type):
                 cache.add(grade_key)
                 log_debug("Nouvelle note", grade.subject.name, grade.grade)
                 await send_notifications(handler_type, grade)
+
+
+def remove_latest_grade_from_cache():
+    """Supprime la dernière note du cache pour forcer une notification (debug)."""
+    if not GRADES_CACHE:
+        return False
+    # Trie par date ISO (YYYY-MM-DD) pour retirer la plus récente
+    latest = max(GRADES_CACHE, key=lambda k: k[2])
+    GRADES_CACHE.remove(latest)
+    log_debug("Suppression forcée de la dernière note du cache", latest)
+    return True
 
 
 async def check_news_and_discussions(session, cache, handler_type):
@@ -79,9 +97,9 @@ async def check_news_and_discussions(session, cache, handler_type):
             await send_notifications(handler_type, item)
 
 
-async def check_edt_background(session, cache, handler_type):
+async def check_edt_background(session, cache, handler_type, days):
     """Vérifie et notifie les mises à jour de l'emploi du temps."""
-    actual_edt = check_edt(session)
+    actual_edt = check_edt(session, days)
 
     for hour in actual_edt:
         hour_key = (
@@ -160,9 +178,39 @@ async def check_homeworks(session, cache, handler_type):
 
 async def send_notifications(handler_type, data):
     """Envoie des notifications via les webhooks."""
-    await asyncio.gather(
-        send_custom_webhook(data), WEBHOOK_CALLBACKS[handler_type](data)
-    )
+    import inspect
+
+    tasks = []
+
+    # custom webhook if configured
+    if env.get("CUSTOM_WEBHOOK_URL") and env.get("CUSTOM_WEBHOOK_PASS"):
+        tasks.append(send_custom_webhook(data))
+
+    # Discord / provider callback
+    cb = WEBHOOK_CALLBACKS.get(handler_type, _disabled_noop)
+    try:
+        cb_result = cb(data)
+    except Exception:
+        # If calling the callback raises synchronously, run it in a thread
+        tasks.append(asyncio.to_thread(cb, data))
+    else:
+        if inspect.isawaitable(cb_result):
+            tasks.append(cb_result)
+        else:
+            tasks.append(asyncio.to_thread(cb, data))
+
+    # Telegram provider if configured
+    if env.get("TELEGRAM_BOT_TOKEN") and env.get("TELEGRAM_CHAT_ID"):
+        try:
+            from webhook.telegram import send_telegram_message
+
+            tasks.append(send_telegram_message(handler_type, data))
+        except Exception:
+            if debug_mode():
+                print(Debug("Impossible d'importer le provider Telegram"))
+
+    if tasks:
+        await asyncio.gather(*tasks)
 
 
 def log_debug(message, *details):
@@ -173,25 +221,31 @@ def log_debug(message, *details):
 
 async def cleanup():
     """Clean up resources before exiting."""
-    global session
-    if session:
-        session.communication.session.close()  # Close the Pronote session
+    if session_state.SESSION:
+        session_state.SESSION.communication.session.close()  # Close the Pronote session
     print("Resources cleaned up. Exiting...")
 
 
 async def main():
     """Point d'entrée principal."""
+    env = get_env_variable()
+    edt_days = int(env.get("PRONOTE_EDT_DAYS", 14))
+
     await setup_cache_handler()
+
+    if debug_mode():
+        remove_latest_grade_from_cache()
+
     print("Initialisation terminée. Surveillance en cours...")
     try:
         await asyncio.gather(
-            check_for_updates(session, check_grades, GRADES_CACHE, "grade"),
-            check_for_updates(session, check_news_and_discussions, NEWS_CACHE, "news"),
+            check_for_updates(check_grades, GRADES_CACHE, "grade"),
+            check_for_updates(check_news_and_discussions, NEWS_CACHE, "news"),
             check_for_updates(
-                session, check_news_and_discussions, DISCUSSIONS_CACHE, "discussion"
+                check_news_and_discussions, DISCUSSIONS_CACHE, "discussion"
             ),
-            check_for_updates(session, check_edt_background, EDT_CACHE, "edt"),
-            check_for_updates(session, check_homeworks, HOMEWORKS_CACHE, "homework"),
+            check_for_updates(check_edt_background, EDT_CACHE, "edt", edt_days),
+            check_for_updates(check_homeworks, HOMEWORKS_CACHE, "homework"),
         )
     except KeyboardInterrupt:
         print("Arrêt du programme.")

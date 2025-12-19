@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  pronote-notifier:
+    build: .
+    container_name: pronote-notifier
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: ["python", "main.py"]
+    # Uncomment to inspect logs interactively
+    # tty: true
+    # stdin_open: true

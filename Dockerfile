@@ -11,14 +11,13 @@ COPY pyproject.toml .
 COPY src/ ./src/
 
 # Installer les dépendances Python
-RUN pip install --no-cache-dir pronotepy schedule python-dotenv
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Créer le répertoire pour les logs
 RUN mkdir -p logs
 
 # Variable d'environnement par défaut
 ENV PYTHONUNBUFFERED=1
-ENV CHECK_INTERVAL=30
 
 # Lancer le serveur
-CMD ["python", "src/run_server.py", "${CHECK_INTERVAL}"]
+CMD ["python", "src/main.py"]

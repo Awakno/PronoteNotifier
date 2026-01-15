@@ -14,6 +14,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Copier les fichiers du projet
 COPY pyproject.toml .
 COPY src/ ./src/
+COPY .env .
 
 # Installer les dépendances Python avec uv
 RUN uv pip install --system pronotepy python-dotenv schedule python-telegram-bot

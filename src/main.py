@@ -78,9 +78,17 @@ def on_new_grades(grades):
     logger.info(f"🎓 {len(grades)} NOUVELLE(S) NOTE(S) !")
     for grade in grades:
         try:
-            subject_name = grade.subject.name if hasattr(grade.subject, 'name') else str(grade.subject)
-            grade_value = grade.grade_value if hasattr(grade, 'grade_value') else getattr(grade, 'value', 'N/A')
-            out_of = grade.out_of if hasattr(grade, 'out_of') else 'N/A'
+            subject_name = (
+                grade.subject.name
+                if hasattr(grade.subject, "name")
+                else str(grade.subject)
+            )
+            grade_value = (
+                grade.grade_value
+                if hasattr(grade, "grade_value")
+                else getattr(grade, "value", "N/A")
+            )
+            out_of = grade.out_of if hasattr(grade, "out_of") else "N/A"
             logger.info(f"  📚 {subject_name} - {grade_value}/{out_of}")
         except Exception as e:
             logger.error(f"  Erreur lors du traitement de la note: {e}")
@@ -91,7 +99,11 @@ def on_new_homework(homework_list):
     logger.info(f"✏️  {len(homework_list)} NOUVEAU(X) DEVOIR(S) !")
     for homework in homework_list:
         try:
-            subject_name = homework.subject.name if hasattr(homework.subject, 'name') else str(homework.subject)
+            subject_name = (
+                homework.subject.name
+                if hasattr(homework.subject, "name")
+                else str(homework.subject)
+            )
             logger.info(f"  📝 {subject_name} - À rendre: {homework.date}")
         except Exception as e:
             logger.error(f"  Erreur lors du traitement du devoir: {e}")

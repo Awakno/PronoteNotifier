@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  pronote-notifier:
+    build: .
+    container_name: pronote-notifier
+    environment:
+      - PRONOTE_URL=${PRONOTE_URL}
+      - PRONOTE_USERNAME=${PRONOTE_USERNAME}
+      - PRONOTE_PASSWORD=${PRONOTE_PASSWORD}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-30}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

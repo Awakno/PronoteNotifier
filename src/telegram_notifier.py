@@ -38,37 +38,22 @@ class TelegramNotifier:
                 self.enabled = False
 
     def _send_message_sync(self, message: str) -> bool:
-        """Envoyer un message de manière synchrone (avec thread + nouvelle boucle)."""
-        if not self.enabled or not self.bot:
+        loop = asyncio.get_event_loop()
+        future = asyncio.run_coroutine_threadsafe(
+            self.bot.send_message(
+                chat_id=self.chat_id,
+                text=message,
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            ),
+            loop
+        )
+        try:
+            future.result(timeout=10)
+            return True
+        except Exception as e:
+            logger.error(f"❌ Erreur Telegram: {e}")
             return False
-
-        def send_in_thread():
-            """Fonction qui tourne dans un thread séparé."""
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    loop.run_until_complete(
-                        self.bot.send_message(
-                            chat_id=self.chat_id,
-                            text=message,
-                            parse_mode="HTML",
-                            disable_web_page_preview=True,
-                        )
-                    )
-                finally:
-                    loop.close()
-            except TelegramError as e:
-                logger.error(f"❌ Erreur Telegram: {e}")
-            except Exception as e:
-                logger.error(f"❌ Erreur asyncio: {e}")
-
-        import threading
-        thread = threading.Thread(target=send_in_thread, daemon=True)
-        thread.start()
-        thread.join(timeout=10)
-        
-        return True
 
     def create_grade_callback(self) -> Callable:
         """Créer un callback pour les nouvelles notes."""
